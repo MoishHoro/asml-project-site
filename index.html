@@ -1,0 +1,701 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Self-Adjusting Photolithography Lens — CCNY × ASML</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --white: #ffffff;
+      --off-white: #f8f7f4;
+      --light-gray: #efefec;
+      --mid-gray: #c8c7c2;
+      --text-muted: #8a8980;
+      --text-body: #3a3a36;
+      --text-dark: #1a1a18;
+      --accent: #1a4fa8;
+      --accent-light: #e8eef8;
+      --border: #e2e1dc;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--sans); color: var(--text-body); background: var(--white); line-height: 1.6; font-size: 16px; }
+
+    /* NAV */
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 60px; }
+    .nav-logo { font-family: var(--serif); font-size: 1rem; color: var(--text-dark); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* DROPDOWN */
+    .dropdown { position: relative; }
+    .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background: var(--white); border: 1px solid var(--border); list-style: none; padding: 0; margin: 0; min-width: 200px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 101; }
+    .dropdown:hover .dropdown-menu { display: block; }
+    .dropdown-menu li { border-bottom: 1px solid var(--border); }
+    .dropdown-menu li:last-child { border-bottom: none; }
+    .dropdown-menu .dropdown-intro { padding: 10px 15px; color: var(--text-muted); font-size: 0.78rem; text-transform: none; line-height: 1.4; }
+    .dropdown-menu a { display: block; padding: 10px 15px; color: var(--text-body); text-decoration: none; font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+    .dropdown-menu a:hover { background: var(--accent-light); color: var(--accent); }
+
+    /* HERO */
+    .hero { min-height: 100vh; display: grid; grid-template-rows: 1fr auto; padding: 120px 80px 80px; background: linear-gradient(180deg, rgba(245,247,252,0.95), rgba(225,235,248,0.65)); position: relative; overflow: hidden; color: #1a1a18; }
+    .hero::before { content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(26,79,168,0.12) 0%, transparent 70%); pointer-events: none; }
+    .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,26,24,0.86); background: rgba(255,255,255,0.86); border: 1px solid rgba(26,26,24,0.08); padding: 6px 14px; border-radius: 100px; width: fit-content; margin-bottom: 36px; }
+    .hero-image-wrap { border-radius: 16px; overflow: hidden; box-shadow: 0 32px 90px rgba(0,0,0,0.16); }
+    .hero-img { width: 100%; display: block; }
+    .hero-title { font-family: var(--serif); font-size: clamp(2.4rem, 4vw, 4rem); color: var(--text-dark); line-height: 1.08; margin-bottom: 0; }
+    .hero-title em { font-style: italic; color: var(--accent); }
+    .hero-desc { font-size: 1.1rem; color: #7a736a; line-height: 1.75; margin: 30px 0 42px; font-weight: 400; }
+    .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+    .btn-primary, .btn-secondary, .btn-tertiary { background: #689bf3; color: white; padding: 14px 28px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem; border: 1px solid transparent; transition: background 0.2s, transform 0.15s; }
+    .btn-primary:hover, .btn-secondary:hover, .btn-tertiary:hover { background: #689bf3; transform: translateY(-1px); }
+    .hero-meta { display: flex; gap: 48px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 32px; flex-wrap: wrap; margin-top: 60px; }
+    .hero-meta-item label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7e75; margin-bottom: 4px; }
+    .hero-meta-item span { font-size: 0.95rem; color: #7a736a; font-weight: 500; }
+
+    /* SECTIONS */
+    section { padding: 100px 80px; }
+    .section-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .section-title { font-family: var(--serif); font-size: clamp(1.8rem, 3.5vw, 2.8rem); color: var(--text-dark); line-height: 1.15; margin-bottom: 20px; }
+    .section-body { font-size: 1rem; color: var(--text-muted); line-height: 1.8; max-width: 640px; font-weight: 300; }
+
+    /* OVERVIEW */
+    #overview { background: var(--white); }
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-top: 60px; }
+    .overview-text p { font-size: 1.4rem; color: var(--text-body); line-height: 1.85; margin-bottom: 20px; font-weight: 300; }
+    .specs-header { display: inline-block; background: var(--accent); color: white; font-family: var(--serif); font-size: 1.4rem; font-weight: 600; padding: 12px 24px; border-radius: 8px; margin-bottom: 20px; letter-spacing: 0.02em; }
+    .overview-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; align-self: start; }
+    .stat-card { background: var(--white); padding: 28px 24px; }
+    .stat-value { font-family: var(--serif); font-size: 2.2rem; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; }
+    .component-images { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-top: 40px; }
+    .component-item { text-align: center; }
+    .component-item img { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+    .component-caption { font-size: 0.9rem; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+
+    /* MEDIA */
+    #media { background: var(--off-white); }
+    .media-intro { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 48px; flex-wrap: wrap; gap: 20px; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .gallery-item { background: var(--light-gray); border-radius: 8px; aspect-ratio: 4/3; position: relative; overflow: hidden; }
+    .gallery-item:hover .gallery-caption { opacity: 1; }
+    .gallery-item.featured { grid-column: span 2; aspect-ratio: 16/9; background: #111; }
+    .gallery-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item.featured .gallery-img { object-fit: contain; }
+    .gallery-caption { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.68)); color: white; font-size: 0.82rem; font-weight: 500; padding: 32px 16px 14px; opacity: 0; transition: opacity 0.25s; }
+
+    /* DESIGN */
+    #design { background: var(--white); }
+    .design-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 60px; }
+    .design-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; }
+    .design-card:hover { border-color: var(--accent); box-shadow: 0 4px 24px rgba(26,79,168,0.06); }
+    .design-card-img { width: 100%; object-fit: cover; background: var(--light-gray); display: block; }
+    .design-card:nth-child(1) .design-card-img { object-position: 50% 50%; aspect-ratio: 5/3; transform: scale(1); }
+    .design-card:nth-child(2) .design-card-img { object-position: 75% 50%; aspect-ratio: 5/3; }
+    .design-card:nth-child(3) .design-card-img { object-position: 50% 0%; aspect-ratio: 5/3; }
+    .design-card-img.placeholder { display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--text-muted); }
+    .result-card-img, .update-card-img { object-position: 50% 50%; transform: scale(1); }
+    .design-card-body { padding: 24px 24px 28px; }
+    .design-card-num { font-family: var(--serif); font-size: 1.6rem; color: var(--accent-light); -webkit-text-stroke: 1px var(--accent); line-height: 1; margin-bottom: 10px;}
+    .design-card h3 { font-family: var(--serif); font-size: 1.15rem; color: var(--text-dark); margin-bottom: 10px; }
+    .design-card p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.7; }
+    .design-card.winner { border-color: var(--accent); box-shadow: 0 4px 24px rgba(26,79,168,0.08); position: relative; }
+    .design-cards-wrapper { position: relative; }
+    .winner-badge { position: absolute; top: -75px; right: 27px; z-index: 2; }
+    .winner-badge { display: inline-block; background: var(--accent); color: white; font-family: var(--serif); font-size: 1.2rem; font-weight: 600; letter-spacing: 0.04em; text-transform: capitalize; padding: 10px 20px; border-radius: 8px; margin-bottom: 16px; }
+
+    /* SEMESTER UPDATE */
+   #updates { background: var(--off-white); }
+    .update-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 60px; }
+    .update-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .update-card-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; background: var(--light-gray); }
+    .update-card-body { padding: 24px; }
+    .update-tag { display: inline-block; background: var(--accent-light); color: var(--accent); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; margin-bottom: 10px; }
+    .update-card h3 { font-family: var(--serif); font-size: 1.1rem; color: var(--text-dark); margin-bottom: 10px; }
+    .update-card p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.7; }
+    .compare-block { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .compare-img-wrap { text-align: center; }
+    .compare-img-wrap img { width: 100%; border-radius: 6px; border: 1px solid var(--border); object-fit: cover; aspect-ratio: 4/3; }
+    .compare-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+   
+    /* SUBSYSTEMS */
+    .section-subtitle { font-size: 0.86rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+    .architecture-block { margin-top: 80px; }
+    .subsystem-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: rgba(23, 31, 56, 0.05); margin-top: 30px; border: 1px solid rgba(0,0,0,0.06); border-radius: 8px; overflow: hidden; }
+    .subsystem-item { display: block; text-decoration: none; color: inherit; background: var(--text-dark); padding: 40px 36px; transition: background 0.2s, box-shadow 0.2s; cursor: pointer; }
+    .subsystem-item:hover, .subsystem-item:focus-visible, .subsystem-item:visited { background: #222220; box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 18px 40px rgba(0,0,0,0.16); color: inherit; }
+    .subsystem-item:focus-visible { outline: 3px solid rgba(103,146,234,0.9); outline-offset: 4px; }
+    .subsystem-item:visited { color: inherit; }
+    .subsystem-num { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; color: #7a9fd4; margin-bottom: 12px; }
+    .subsystem-item h3 { font-family: var(--serif); font-size: 1.35rem; color: white; margin-bottom: 12px; }
+    .subsystem-item p { font-size: 0.88rem; color: rgba(255,255,255,0.75); line-height: 1.7; }
+    /* RESULTS */
+    #results { background: var(--white); }
+    .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 60px; }
+    .result-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .result-card-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: var(--light-gray); }
+    .result-card-body { padding: 28px; }
+    .result-card h3 { font-family: var(--serif); font-size: 1.1rem; color: var(--text-dark); margin-bottom: 12px; }
+    .result-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.75; }
+    .result-highlight { display: inline-block; background: var(--accent-light); color: var(--accent); border-radius: 4px; padding: 3px 8px; font-weight: 600; font-size: 0.82rem; margin-top: 14px; }
+
+    /* PRESENTATIONS */
+    #presentations { background: var(--off-white); }
+    .pres-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 48px; }
+    .pres-card { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 32px; display: flex; flex-direction: column; gap: 16px; text-decoration: none; color: inherit; transition: border-color 0.2s, box-shadow 0.2s; }
+    .pres-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(26,79,168,0.08); }
+    .pres-card h3 { font-family: var(--serif); font-size: 1.15rem; color: var(--text-dark); }
+    .pres-card p { font-size: 0.86rem; color: var(--text-muted); line-height: 1.7; flex: 1; }
+    .pres-topics { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .pres-topics li { font-size: 0.82rem; color: var(--text-body); padding-left: 16px; position: relative; }
+    .pres-topics li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-size: 0.75rem; }
+    .pres-semester { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+
+    /* TEAM */
+    #team { background: var(--white); }
+    .team-header { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; margin-bottom: 60px; }
+    .team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .team-card { text-align: center; }
+    .team-avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--light-gray); margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 1.2rem; color: var(--accent); border: 2px solid var(--border); }
+    .team-card h4 { font-size: 0.85rem; font-weight: 600; color: var(--text-dark); line-height: 1.3; }
+    .team-card span { font-size: 0.75rem; color: var(--text-muted); }
+    .supervisor-note { margin-top: 40px; padding: 24px 28px; background: var(--off-white); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; font-size: 0.9rem; color: var(--text-muted); }
+    .supervisor-note strong { color: var(--text-dark); }
+
+    footer { background: var(--off-white); border-top: 1px solid var(--border); padding: 40px 80px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .footer-left { font-family: var(--serif); font-size: 1rem; color: var(--text-dark); }
+    .footer-right { font-size: 0.8rem; color: var(--text-muted); }
+
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      section { padding: 60px 24px; }
+      .hero { padding: 100px 24px 60px; }
+      .hero-inner { grid-template-columns: 1fr; gap: 32px; }
+      .overview-grid, .results-grid, .update-grid, .team-header, .pres-grid { grid-template-columns: 1fr; gap: 32px; }
+      .design-grid { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-item.featured { grid-column: span 2; }
+      .team-grid { grid-template-columns: repeat(3, 1fr); }
+      .subsystem-list { grid-template-columns: 1fr; }
+      footer { flex-direction: column; text-align: center; padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">ASML × CCNY</div>
+    <ul class="nav-links">
+      <li class="dropdown">
+        <a href="#overview">Overview</a>
+        <ul class="dropdown-menu">
+          <li><a href="#overview">Background, Statement, and Specs</a></li>
+          <li><a href="#subsystems">Architecture</a></li>
+        </ul>
+      </li>    
+      <li><a href="#media">Gallery</a></li>
+      <li><a href="#design">Concepts</a></li>
+      <li class="dropdown">
+        <a href="#updates">Updates</a>
+        <ul class="dropdown-menu">
+          <li class="dropdown-intro">Subsystem quick links: Optic Mount, Base & Actuation, Control, Testing Rig</li>
+          <li><a href="#optic-mount">Optic Mount</a></li>
+          <li><a href="#base-actuation">Base & Actuation</a></li>
+          <li><a href="#control">Control</a></li>
+          <li><a href="#testing-rig">Testing Rig</a></li>
+        </ul>
+      </li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#presentations">Presentations</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="hero-tag">Senior Design Project · CCNY × ASML</div>
+        <h1 class="hero-title">Self-Adjusting <em>Photolithography</em> Lens</h1>
+        <p class="hero-desc">A radially compliant lens-tilting mechanism that precisely controls a focal point — self-correcting for vibration and thermal disturbances in real time.</p>
+        <div class="hero-ctas">
+          <a href="#overview" class="btn-primary">Explore the Project</a>
+          <a href="#presentations" class="btn-tertiary">See Our Reports</a>
+          <a href="#team" class="btn-secondary">Meet the Team</a>
+        </div>
+      </div>
+      <div class="hero-image-wrap">
+        <img src="assets/images/sem2/slide-42_untitled_img-01.png" alt="Assembled prototype in testing rig" class="hero-img"/>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><label>Institution</label><span>City College of New York</span></div>
+      <div class="hero-meta-item"><label>Industry Partner</label><span>ASML</span></div>
+      <div class="hero-meta-item"><label>Supervisor</label><span>Matthew Sorna</span></div>
+    </div>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section id="overview"><div class="section-label">Project Overview — Background, Statement, and Specs</div>    
+    <div class="overview-grid">
+      <div class="overview-text fade-in">        <h2 class="section-title">Precise light control for next-generation chip manufacturing</h2>
+        <p>ASML — the world's leading manufacturer of Extreme Ultraviolet (EUV) photolithography machines — challenged our team to design a lens-tilting mechanism capable of directing a focal point with sub-millimeter precision while remaining self-correcting in the face of vibration and thermal change.</p>
+        <p>Our solution uses three P8-ST micro stepper actuators arranged at 120° intervals beneath a 100mm-wide lens, paired with a radially compliant flexure mount that protects the lens from stress during thermal expansion. An onboard MPU-6050 accelerometer/gyroscope enables real-time self-adjustment.</p>
+        <p>The core principle — accurate optical tilting with passive stress relief — has broad applications in medical imaging, fiber optics, laser cutting, and high-resolution microscopy.</p>
+      </div>
+      <div>
+        <div class="specs-header">Requirements and Specifications</div>
+        <div class="overview-stats fade-in">
+        <div class="stat-card"><div class="stat-value">±10°</div><div class="stat-label">Tilt range in Rx and Ry</div></div>
+        <div class="stat-card"><div class="stat-value">1728×</div><div class="stat-label">Z-to-XY stiffness ratio<br>(required: 1000×)</div></div>
+        <div class="stat-card"><div class="stat-value">&lt;3s</div><div class="stat-label">Focal point repositioning time</div></div>
+        <div class="stat-card"><div class="stat-value">∞</div><div class="stat-label">Flexure fatigue life under thermal cycling</div></div>
+        <div class="stat-card"><div class="stat-value">0.01mm</div><div class="stat-label">Actuator step resolution</div></div>
+        <div class="stat-card"><div class="stat-value">&lt;8 MPa</div><div class="stat-label">Max thermal stress on lens</div></div>
+        </div>
+        <div class="component-images">
+          <div class="component-item">
+            <img src="https://images.thingbits.net/eyJidWNrZXQiOiJ0aGluZ2JpdHMtbmV0Iiwia2V5IjoicTl4dnVzN29tOTM3NGVuYnJxNXM3cGQxOTM5MSIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6NDgwLCJoZWlnaHQiOjM2MCwiZml0IjoiY292ZXIifX19" alt="P8-ST Micro Stepper Actuators">
+            <p class="component-caption">P8-ST Micro Stepper Actuators</p>
+          </div>
+          <div class="component-item">
+            <img src="https://alexnld.com/wp-content/uploads/2015/03/SKU080242j.jpg" alt="MPU-6050 Accelerometer/Gyroscope">
+            <p class="component-caption">MPU-6050 Accelerometer/Gyroscope</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+ <!-- SUBSYSTEMS -->
+  <section id="subsystems">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">Four integrated subsystems</h2>
+    <div class="subsystem-list fade-in">
+      <a class="subsystem-item" href="#optic-mount">
+        <div class="subsystem-num">SUBSYSTEM 01</div>
+        <h3>Optic Mount</h3>
+        <p>A radially compliant support subsystem that holds the lens and manages thermal movement while preserving alignment.</p>
+      </a>
+      <a class="subsystem-item" href="#base-actuation">
+        <div class="subsystem-num">SUBSYSTEM 02</div>
+        <h3>Base & Actuation</h3>
+        <p>Precision actuation and base support that converts motion commands into controlled lens tilt with repeatable alignment.</p>
+      </a>
+      <a class="subsystem-item" href="#control">
+        <div class="subsystem-num">SUBSYSTEM 03</div>
+        <h3>Inverse Kinematics & Control</h3>
+        <p>A parallel manipulator model translates desired focal point (x, y) coordinates into actuator extensions using trigonometric projection and vector algebra. Modular firmware closes the loop on motion and sensor feedback.</p>
+      </a>
+      <a class="subsystem-item" href="#testing-rig">
+        <div class="subsystem-num">SUBSYSTEM 04</div>
+        <h3>Testing Rig</h3>
+        <p>A T-slot aluminum extrusion frame with custom 3D-printed connectors. Height is adjustable to match the lens focal length exactly. Supports two configurations: lens hanging below the ring (Config 1) or resting above it (Config 2).</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- MEDIA GALLERY -->
+  <section id="media">
+    <div class="media-intro">
+      <div>
+        <div class="section-label">Gallery</div>
+        <h2 class="section-title">Build & Design</h2>
+        <p class="section-body">Photos and recordings from the physical build, fabrication, and live demonstration.</p>
+      </div>
+    </div>
+    <div class="gallery-grid fade-in">
+      <div class="gallery-item featured">
+        <img src="assets/images/sem2/slide-38_video-demonstration_img-01.jpg" alt="Full test setup with light source and testing rig" class="gallery-img"/>
+        <div class="gallery-caption">Full test setup — light source and testing rig</div>
+      </div>
+      <div class="gallery-item">
+        <img src="assets/images/sem2/slide-42_untitled_img-02.png" alt="Assembled mechanism with electronics" class="gallery-img"/>
+        <div class="gallery-caption">Assembled mechanism with electronics</div>
+      </div>
+      <div class="gallery-item">
+        <img src="assets/images/sem2/slide-38_video-demonstration_img-02.gif" alt="Live demonstration" class="gallery-img"/>
+        <div class="gallery-caption">Live demonstration</div>
+      </div>
+      <div class="gallery-item">
+        <img src="assets/images/sem2/slide-31_electronics-layout_img-01.png" alt="Electronics — Arduino Mega, motor drivers, IMU" class="gallery-img"/>
+        <div class="gallery-caption">Electronics — Arduino Mega, motor drivers, IMU</div>
+      </div>
+      <div class="gallery-item">
+        <img src="assets/images/sem2/slide-22_manufacturing_img-02.png" alt="Machined aluminum flexure" class="gallery-img"/>
+        <div class="gallery-caption">Machined aluminum flexure</div>
+      </div>
+      <div class="gallery-item">
+        <img src="assets/images/sem2/slide-36_testing-rig_img-03.png" alt="Testing rig with light source — Config 1" class="gallery-img"/>
+        <div class="gallery-caption">Testing rig with light source — Config 1</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESIGN CONCEPTS -->
+  <section id="design">
+    <div class="section-label">Concept Selection</div>
+    <h2 class="section-title">Three designs. One winner.</h2>
+    <p class="section-body">We evaluated three actuation concepts against eleven weighted engineering criteria before converging on linear actuation.</p>
+    <div class="design-cards-wrapper">
+      <span class="winner-badge">Selected Design</span>
+      <div class="design-grid fade-in">
+      <div class="design-card">
+        <img src="assets/images/sem2/slide-11_actuation-design-concepts-and-selection_img-02.jpg" alt="Gyroscope concept CAD" class="design-card-img"/>
+        <div class="design-card-body">
+          <div class="design-card-num">01:  "Gyremy"</div>
+          <h3>Gyroscope-Shaped</h3>
+          <p>Three concentric rings providing independent rotation on two axes. High accuracy, but complex internal wiring and very difficult assembly made integration impractical. Final score: 134.</p>
+        </div>
+      </div>
+      <div class="design-card">
+        <img src="assets/images/sem2/slide-11_actuation-design-concepts-and-selection_img-03.png" alt="Tilt-track concept CAD" class="design-card-img"/>
+        <div class="design-card-body">
+          <div class="design-card-num">02:  "Thomas"</div>
+          <h3>Tilt-Track & Rotator</h3>
+          <p>Separates tilt and pitch using a single tilt axis plus full rotation. Eliminated due to external gear space requirements, torque demands, and slow repositioning speed. Final score: 111.</p>
+        </div>
+      </div>
+      <div class="design-card winner">
+        <img src="assets/images/sem2/slide-11_actuation-design-concepts-and-selection_img-01.png" alt="Linear actuator CAD model" class="design-card-img" style="object-fit:cover;"/>
+        <div class="design-card-body">
+          <div class="design-card-num">03:  "Lynn"</div>
+          <h3>Linear Actuation</h3>
+          <p>Three stepper motors at 120° intervals beneath the lens. Top scores in assembly ease, wiring, and manufacturability. Compact, precise, and holds position without continuous power. Final score: 149.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+    <!-- SEMESTER UPDATES -->
+     <section id="updates">
+    <div class="section-label">Semester 2 Updates</div>
+    <h2 class="section-title">Redesigned. Purchased. Built.</h2>
+    <p class="section-body">This semester the team purchased all components, redesigned several subsystems for real-world manufacturability, and assembled the physical prototype.</p>
+  </section>
+
+
+  <!-- SUBSYSTEM 01: OPTIC MOUNT -->
+  <section id="optic-mount">
+    <div class="section-label">Subsystem 01</div>
+    <h2 class="section-title">Optic Mount</h2>
+    <p class="section-body">A radially compliant mechanism that holds the lens and manages thermal expansion while maintaining alignment.</p>
+    <div class="update-grid fade-in">
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-14_01_img-01.png" alt="Redesigned mounting ring" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Redesigned</span>
+          <h3>Mounting Ring — Split Design</h3>
+          <p>The single-piece mounting ring was split into two sections for machinability. Screw holes were enlarged for easier assembly, and a connection plane was added on the side to accommodate the accelerometer module.</p>
+        </div>
+     </div>
+   <div class="update-card">
+        <div class="update-card-body" style="padding-top:24px;">
+          <span class="update-tag">Redesigned</span>
+          <h3>Radially Compliant Flexure</h3>
+          <p>The original flexure legs were replaced with washer-style contact feet for easier machining. The body was enlarged to accommodate bigger connecting screws, and a lip was added at the bottom face to ensure the lens rests correctly on the mounting ring.</p>
+          <div class="compare-block">
+            <div class="compare-img-wrap">
+              <img src="assets/images/sem2/slide-20_flexures-design-iteration_img-02.png" alt="Old flexure design"/>
+              <div class="compare-label">Original Flexure</div>
+            </div>
+            <div class="compare-img-wrap">
+              <img src="assets/images/sem2/slide-20_flexures-design-iteration_img-01.png" alt="New flexure design"/>
+              <div class="compare-label">Redesigned Flexure</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-24_mounting-ring-design-iteration_img-04.jpg" alt="Machined aluminum mounting ring" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Fabricated</span>
+          <h3>Machined Mounting Ring</h3>
+          <p>The final mounting ring was CNC-machined from aluminum stock. The split design was verified to fit the lens diameter cleanly, with all flexure slots and screw holes matching the CAD model within tolerance.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-42_untitled_img-03.jpg" alt="3D printed prototype assembly" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Prototype</span>
+          <h3>3D-Printed Early Prototype</h3>
+          <p>Before machining, a full-scale 3D-printed prototype was assembled to verify component spacing, actuator travel, and ball-and-socket joint geometry. This iteration confirmed the split ring concept and identified screw hole sizing adjustments needed for the final part.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- SUBSYSTEM 02: BASE & ACTUATION -->
+  <section id="base-actuation">
+    <div class="section-label">Subsystem 02</div>
+    <h2 class="section-title">Base & Actuation</h2>
+    <p class="section-body">Three P8-ST micro stepper actuators at 120° spacing drive the mounting ring's tilt. A 3D-printed motor holder and aluminum base ring position each actuator precisely, while a ball-and-socket joint converts linear extension into smooth tilt motion.</p>
+    <div class="update-grid fade-in">
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-15_02-subsystem-base-and-actuation_img-01.png" alt="Base ring with motor holders CAD" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">New Component</span>
+          <h3>Base Ring & Motor Holders</h3>
+          <p>The aluminum base ring provides structural support for the full assembly. Three 3D-printed motor holders mount to it at exactly 120° intervals, keeping each actuator aligned with the ball-and-socket joint on the mounting ring above.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-29_base-ring-design_img-03.png" alt="Base ring CAD top view" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Reselected</span>
+          <h3>Actuator — P8-ST Micro Stepper</h3>
+          <p>The original NEMA 8 captive stepper could not be sourced due to shipping issues. It was replaced with the P8-ST Micro Stepper Actuator — a 25 mm stroke, 4.2V unit with 0.01 mm step resolution that meets all load and travel requirements.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-15_02-subsystem-base-and-actuation_img-02.png" alt="Electronics breadboard setup" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">New Component</span>
+          <h3>Electronics Stack</h3>
+          <p>Arduino Mega 2560 as the main controller, three DRV8834 stepper motor driver carriers, a STEMMA QT MPU-6050 accelerometer/gyroscope for orientation feedback, and a low-voltage regulated power supply — all wired on a shared breadboard.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-28_motor_img-04.png" alt="Ball-and-socket joint CAD" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Designed</span>
+          <h3>Ball-and-Socket Joint</h3>
+          <p>Each actuator tip connects to the underside of the mounting ring through a 3D-printed ball-and-socket joint. This allows small angular misalignments as the ring tilts, preventing binding and ensuring smooth, repeatable motion across the full ±10° range.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSYSTEM 03: CONTROL -->
+  <section id="control">
+    <div class="section-label">Subsystem 03</div>
+    <h2 class="section-title">Inverse Kinematics & Control</h2>
+    <p class="section-body">A parallel manipulator model converts a desired focal point (x, y) into individual actuator extensions using trigonometric projection and vector algebra. Closed-loop feedback from the MPU-6050 IMU corrects orientation drift in real time.</p>
+    <div class="update-grid fade-in">
+      <div class="update-card">
+        <div class="update-card-body" style="padding: 28px;">
+          <span class="update-tag">Algorithm</span>
+          <h3>Inverse Kinematics Model</h3>
+          <p>Each of the three actuators sits at a fixed radius from the lens center, spaced 120° apart. Given a desired tilt (θx, θy), the model projects the tilt plane onto each actuator's axis using vector algebra to compute the required linear extension. The result is three independent motor commands issued simultaneously.</p>
+          <br/>
+          <span class="update-tag">Firmware</span>
+          <h3 style="margin-top:8px;">Arduino Control Loop</h3>
+          <p>Modular firmware on the Arduino Mega 2560 reads quaternion orientation from the MPU-6050 over I²C, computes the angular error relative to the target, applies the inverse kinematics to produce actuator deltas, and steps each DRV8834 driver accordingly — running the full closed loop on every iteration.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-31_electronics-layout_img-01.png" alt="Electronics layout — Arduino, motor drivers, IMU" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Hardware</span>
+          <h3>Sensor & Driver Integration</h3>
+          <p>The MPU-6050 IMU streams orientation quaternions to the Arduino via I²C. Three DRV8834 carriers independently control microstepping for each P8-ST actuator. A single regulated 5V supply powers all three drivers from a shared rail, keeping the wiring compact and noise-isolated.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBSYSTEM 04: TESTING RIG -->
+  <section id="testing-rig">
+    <div class="section-label">Subsystem 04</div>
+    <h2 class="section-title">Testing Rig</h2>
+    <p class="section-body">A T-slot aluminum extrusion frame with 3D-printed corner connectors. Height is adjustable to match the lens focal length exactly. Supports two configurations and houses the full assembly for live focal point demonstrations.</p>
+    <div class="update-grid fade-in">
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-17_04-subsystem-testing-apparatus_img-01.png" alt="Assembled testing rig with full mechanism" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Built</span>
+          <h3>Assembled Rig</h3>
+          <p>The T-slot aluminum extrusion frame holds the complete mechanism — base ring, mounting ring, lens, and electronics — at a fixed height calibrated to the focal length of the chosen lens. 3D-printed corner connectors lock each extrusion joint securely without machining.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <div class="update-card-body" style="padding: 28px;">
+          <span class="update-tag">Config 1</span>
+          <h3>Lens Hanging Below Ring</h3>
+          <p>The lens is suspended below the mounting ring, with the light source entering from above. Used for early focal-length calibration and first-pass tilt alignment verification.</p>
+          <br/>
+          <span class="update-tag">Config 2</span>
+          <h3 style="margin-top:8px;">Lens Resting Above Ring</h3>
+          <p>The lens rests on top of the ring and the light source illuminates from below. Used in the final live demonstration — the focal point is steered upward onto a target screen mounted inside the frame.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-38_video-demonstration_img-03.png" alt="CCNY ASML projected by focal point on black velvet" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Result</span>
+          <h3>Live Focal Point Demonstration</h3>
+          <p>In the final demonstration, the system projected "CCNY ASML" text through the lens onto a black velvet screen. The mechanism was commanded to steer the projected focal point in real time, confirming closed-loop tilt control across both axes.</p>
+        </div>
+      </div>
+      <div class="update-card">
+        <img src="assets/images/sem2/slide-35_light-source-and-optical-issues_img-01.png" alt="Flashlight light source on aluminum stand" class="update-card-img" style="object-fit:cover;"/>
+        <div class="update-card-body">
+          <span class="update-tag">Component</span>
+          <h3>Light Source</h3>
+          <p>A handheld flashlight mounted on a custom 3D-printed aluminum extrusion stand serves as the collimated light source. The stand height is adjustable to center the beam on the lens at each rig configuration, and the flashlight position is repeatably locked for consistent test conditions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS / FEA -->
+  <section id="results">
+    <div class="section-label">Analysis & Results</div>
+    <h2 class="section-title">Validated by FEA simulation</h2>
+    <p class="section-body">All finite element analysis was performed in SolidWorks. Results confirmed the design meets all thermal, fatigue, and stiffness requirements.</p>
+    <div class="results-grid fade-in">
+      <div class="result-card">
+        <img src="assets/images/sem2/slide-26_lens-specification-and-fea-analysis_img-01.png" alt="Thermal expansion of lens - URES displacement map" class="result-card-img" style="object-fit:cover;"/>
+        <div class="result-card-body">
+          <h3>FEA 1 — Thermal Expansion of Lens</h3>
+          <p>A +15°C temperature boundary was applied across all lens faces. The resultant displacement map shows a maximum radial expansion of just 1.28 µm. Peak von Mises stress of 8.5 MPa was observed at contact points — well within the glass yield strength of 35 MPa.</p>
+          <span class="result-highlight">Max displacement: 1.28 µm ✓</span>
+        </div>
+      </div>
+      <div class="result-card">
+        <img src="assets/images/sem2/slide-21_fea-and-fatigue-analysis-for-the-edge-flexures_img-02.png" alt="FEA flexure von Mises stress" class="result-card-img" style="object-fit:cover;"/>
+        <div class="result-card-body">
+          <h3>FEA 2 — Flexure Stress Analysis</h3>
+          <p>The 1.28 µm thermal displacement was applied as a prescribed load on the flexure face. A finer mesh was used at the inner notch (the highest-stress region). Max von Mises stress: 6.1 MPa — against a yield strength of 351.6 MPa, giving a factor of safety of 57.6.</p>
+          <span class="result-highlight">Factor of Safety: 57.6 ✓</span>
+        </div>
+      </div>
+      <div class="result-card">
+        <img src="assets/images/sem2/slide-21_fea-and-fatigue-analysis-for-the-edge-flexures_img-04.gif" alt="Animated FEA fatigue simulation" class="result-card-img" style="object-fit:cover;"/>
+        <div class="result-card-body">
+          <h3>Fatigue Analysis — Infinite Life</h3>
+          <p>Using the Stress-Life method (Shigley's 11th Ed.) with AISI 1020 material properties, the calculated fatigue life under repeated thermal cycling was 2.83 × 10²⁷ cycles. The flexures effectively have infinite life under all expected operating conditions.</p>
+          <span class="result-highlight">Fatigue life: 2.83 × 10²⁷ cycles ✓</span>
+        </div>
+      </div>
+      <div class="result-card">
+        <img src="assets/images/sem2/slide-21_fea-and-fatigue-analysis-for-the-edge-flexures_img-03.png" alt="FEA fixed-constraint boundary conditions on flexure" class="result-card-img" style="object-fit:cover;"/>
+        <div class="result-card-body">
+          <h3>Stiffness Ratio — 1728:1</h3>
+          <p>Cantilever beam theory was used to calculate XY stiffness (2.28 × 10⁵ N/m). A SolidWorks FEA simulation of the mounting ring lip under 100 N load yielded Z stiffness of 3.94 × 10⁸ N/m — a ratio of 1728:1, exceeding the 1000:1 requirement by 72%.</p>
+          <span class="result-highlight">Ratio: 1728:1 (req: 1000:1) ✓</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRESENTATIONS -->
+  <section id="presentations">
+    <div class="section-label">Presentations</div>
+    <h2 class="section-title">Project documentation</h2>
+    <p class="section-body">Full design reports and slide decks from both semesters of the senior design project.</p>
+    <div class="pres-grid fade-in">
+      <a href="https://docs.google.com/document/d/1WGHt8G79VQsnxMae2UXQWM3IdLyQ79XguofJCxcK-Qk/edit?usp=sharing" class="pres-card">
+        <div class="pres-semester">Semester 1 — Final</div>
+        <h3>First Semester Final Report</h3>
+        <p>Comprehensive design documentation and analysis from the first semester.</p>
+        <ul class="pres-topics">
+          <li>Placeholder content</li>
+          <li>Edit these bullet points</li>
+        </ul>
+      </a>
+      <div class="pres-card">
+        <div class="pres-semester">Semester 2 — Final</div>
+        <h3>Second Semester Final Report</h3>
+        <p>Final documentation and results from the second semester of the project.</p>
+        <ul class="pres-topics">
+          <li>Placeholder content</li>
+          <li>Edit these bullet points</li>
+        </ul>
+      </div>
+      <a href="assets/pdfs/First Semester Final Presentation.pdf" class="pres-card">
+        <div class="pres-semester">Semester 1 — Final</div>
+        <h3>Design Report & Final Presentation</h3>
+        <p>Complete technical report covering the full design process: literature search, three design concepts, analysis, FEA, component selection, and 3D-printed prototype.</p>
+        <ul class="pres-topics">
+          <li>Background, motivation & problem statement</li>
+          <li>Three design concepts with attribute chart evaluation</li>
+          <li>Optic mount, flexure, and base design</li>
+          <li>FEA: thermal expansion + flexure stress analysis</li>
+          <li>Stiffness ratio & fatigue life calculations</li>
+          <li>Inverse kinematics & coding architecture</li>
+        </ul>
+      </a>
+      <a href="assets/pdfs/First Semester Mid Semester Presentation.pdf" class="pres-card">
+        <div class="pres-semester">Semester 1 — Mid-Semester</div>
+        <h3>First Semester Mid-Semester Presentation</h3>
+        <p>Mid-semester update and progress review from the first semester.</p>
+        <ul class="pres-topics">
+          <li>Placeholder content</li>
+          <li>Edit these bullet points</li>
+        </ul>
+      </a>
+      <a href="assets/pdfs/Second Semester Mid-Semester Presentation.pdf" class="pres-card">
+        <div class="pres-semester">Semester 2 — Mid-Semester</div>
+        <h3>Mid-Semester Update Presentation</h3>
+        <p>Progress update on component purchasing, subsystem redesigns, electronics, coding structure, and the T-slot testing apparatus.</p>
+        <ul class="pres-topics">
+          <li>Summary of previous semester work</li>
+          <li>Actuator reselection: P8-ST Micro Stepper</li>
+          <li>Mounting ring split-design redesign</li>
+          <li>Flexure and base redesign</li>
+          <li>Electronics stack & Arduino coding outline</li>
+          <li>T-slot testing rig design & next steps</li>
+        </ul>
+      </a>
+      <a href="assets/pdfs/Second Semester Final Presentation.pdf" class="pres-card">
+        <div class="pres-semester">Semester 2 — Final</div>
+        <h3>Final Presentation</h3>
+        <p>Final presentation showcasing the completed project and results.</p>
+        <ul class="pres-topics">
+          <li>Placeholder content</li>
+          <li>Edit these bullet points</li>
+        </ul>
+      </a>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team">
+    <div class="team-header">
+      <div>
+        <div class="section-label">The Team</div>
+        <h2 class="section-title">Built by five mechanical engineers at CCNY</h2>
+      </div>
+      <div>
+        <p class="section-body">A multidisciplinary senior design team from the City College of New York, working in partnership with ASML to solve a real-world precision engineering challenge.</p>
+      </div>
+    </div>
+    <div class="team-grid fade-in">
+      <div class="team-card"><div class="team-avatar">JR</div><h4>Jacob Rabinowitz</h4><span>ME Major<div></div></h5><span>Point of Contact<div></div></h5><span>Testing Rig Design</span></div>
+      <div class="team-card"><div class="team-avatar">JG</div><h4>Jacob Goldsmith</h4><span>ME Major<div></div></h5><span>Lens selection<div></div></h5><span>Coding and Inverse Kinematics</span></div>
+      <div class="team-card"><div class="team-avatar">MH</div><h4>Michael Horowitz</h4><span>ME Major<div></div></h5><span>Team Coordinator<div></div></h5><span>Electonics and Hardware</span></div>
+      <div class="team-card"><div class="team-avatar">MM</div><h4>Michael Moskowitz</h4><span>ME Major<div></div></h5><span>Motor selection<div></div></h5><span>Base Ring Design</span></div>
+      <div class="team-card"><div class="team-avatar">JP</div><h4>Joseph Picard</h4><span>ME Major<div></div></h5><span></span>Manufacturing coordinator<div></div></h5><span>Optic Mount Design</span></div>
+    </div>
+    <div class="supervisor-note">
+      <strong>Faculty Supervisor:</strong> Matthew Sorna &nbsp;·&nbsp;
+      <strong>Industry Partner:</strong> ASML &nbsp;·&nbsp;
+      <strong>Institution:</strong> The City College of New York
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-left">Self-Adjusting Photolithography Lens</div>
+    <div class="footer-right">CCNY Senior Design · In partnership with ASML</div>
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
